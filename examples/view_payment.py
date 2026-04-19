@@ -5,9 +5,8 @@ from trafikverket_client.fp import Client
 
 async def main() -> None:
     async with Client() as client:
-        logged_in = await client.login()
-
-        payment = await logged_in.get_payment_model()
+        session = await client.login()
+        payment = await session.get_payment_model()
 
         print(f"Has debt: {payment.has_debt}")
         print(f"Available balance: {payment.available_balance:.2f} SEK")
