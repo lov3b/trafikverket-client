@@ -13,6 +13,8 @@ Följande installerar klienten med stöd för att rendrera qr-koden till termina
 pip3 install "trafikverket-client[qr]"
 ```
 
+Du vill förmodligen ta en kik under [exempel](/examples) för hur biblioteket kan användas.
+
 ## Vägkarta
 
 - [x] Logga in med BankID
