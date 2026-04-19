@@ -46,6 +46,23 @@ from .booking import (
     TimeInterval,
     VehicleType,
 )
+from .examination import (
+    AccentLanguage,
+    BlobReference,
+    Examination,
+    ExaminationPaymentInfo,
+    ExaminationPlace,
+    ExaminationResult,
+    ExaminationsData,
+    ExaminationsResponse,
+    InformationData,
+    InformationResponse,
+)
+from .payment import (
+    PaymentHistoryItem,
+    PaymentModelData,
+    PaymentModelResponse,
+)
 from .licence import (
     Licence,
     LicenceCategory,
@@ -106,4 +123,17 @@ __all__ = [
     "TachographType",
     "TimeInterval",
     "VehicleType",
+    "AccentLanguage",
+    "BlobReference",
+    "Examination",
+    "ExaminationPaymentInfo",
+    "ExaminationPlace",
+    "ExaminationResult",
+    "ExaminationsData",
+    "ExaminationsResponse",
+    "InformationData",
+    "InformationResponse",
+    "PaymentHistoryItem",
+    "PaymentModelData",
+    "PaymentModelResponse",
 ]

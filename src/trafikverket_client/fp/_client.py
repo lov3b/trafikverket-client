@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession, ClientTimeout
 
+from ._util import parse_json
 from .models import AuthenticationResponse
 from .qr import ShowQr
 
@@ -78,8 +79,8 @@ class Client:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = AuthenticationResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = AuthenticationResponse(**body)
         logger.debug(
             "BankID authentication started, reference_id=%s", parsed.data.reference_id
         )

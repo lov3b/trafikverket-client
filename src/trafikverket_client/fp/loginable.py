@@ -12,8 +12,9 @@ from .models import (
     BankIdExceptionResponse,
     IsAuthorizedResponse,
 )
-from .qr import ShowQr, make_bankid_qr_payload, make_qr_renderer
+from ._util import parse_json
 from .exceptions import BankidStop
+from .qr import ShowQr, make_bankid_qr_payload, make_qr_renderer
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +147,7 @@ class Loginable:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = IsAuthorizedResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = IsAuthorizedResponse(**body)
         logger.debug("is_authorized=%s", parsed.data)
         return parsed.data

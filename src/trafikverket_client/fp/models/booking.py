@@ -1,7 +1,14 @@
 from datetime import date as date_type, datetime, time as time_type
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, HttpUrl, field_serializer, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_serializer,
+    field_validator,
+)
 from pydantic.alias_generators import to_camel
 
 from .._temporal import (
@@ -20,7 +27,7 @@ class ActiveReservation(BaseModel):
 
     examination_id: int
     examination_type_id: int
-    social_security_number: str
+    personal_identity_number: str = Field(alias="socialSecurityNumber")
     location_id: int
     vehicle_type_id: int
     language_id: Optional[int] = None
@@ -87,7 +94,7 @@ class ActiveReservationsResponse(BaseModel):
 
 
 class ConfirmedExaminationsResponse(BaseModel):
-    data: list[dict]
+    data: list[dict[str, object]]
     status: int
     url: HttpUrl
 
@@ -330,7 +337,7 @@ class Aspirant(BaseModel):
 
     id: int
     age: int
-    social_security_number: str
+    personal_identity_number: str = Field(alias="socialSecurityNumber")
     name: str
     address: Address
     has_protected_identity: bool
@@ -343,7 +350,7 @@ class Aspirant(BaseModel):
     allow_email_surveys: bool
     has_return_mail: bool
     updated_by_partner: bool
-    exemptions: list[dict]
+    exemptions: list[dict[str, object]]
     is_deceased: Optional[bool] = None
 
 
@@ -362,7 +369,7 @@ class ReservationInformationData(BaseModel):
 
     aspirant: Aspirant
     reservations: list[Occasion]
-    cancellations: list[dict]
+    cancellations: list[dict[str, object]]
     add_prepaid_photo_fee: bool
     prepaid_photo_fee_cost: float
     is_rescheduling: bool

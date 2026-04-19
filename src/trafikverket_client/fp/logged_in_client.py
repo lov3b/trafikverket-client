@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from aiohttp import ClientSession
 
@@ -14,11 +14,17 @@ from .models import (
     BookingHindrancesResponse,
     ConfirmedExaminationsResponse,
     CreateReservationResponse,
+    ExaminationsData,
+    ExaminationsResponse,
+    InformationData,
+    InformationResponse,
     LicenceInformationData,
     LicenceInformationResponse,
     OccasionBundle,
     OccasionBundlesData,
     OccasionBundlesResponse,
+    PaymentModelData,
+    PaymentModelResponse,
     ReservationInformationData,
     ReservationInformationResponse,
     ReservationTimeResponse,
@@ -32,6 +38,7 @@ from .models import (
     SystemUpdatingData,
     SystemUpdatingResponse,
 )
+from ._util import parse_json
 from .exceptions import NotLoggedInError
 from .licence_information import LicenceInformation
 
@@ -47,7 +54,7 @@ def _booking_session(
     booking_mode_id: int = 0,
     examination_type_id: int = 0,
     searched_months: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     return {
         "socialSecurityNumber": personal_identity_number,
         "licenceId": licence_id,
@@ -109,8 +116,8 @@ class LoggedinClient:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = StartResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = StartResponse(**body)
         logger.debug("Fetched start config, version=%s", parsed.data.version)
         return parsed.data
 
@@ -132,8 +139,8 @@ class LoggedinClient:
             },
             data="null",
         )
-        response.raise_for_status()
-        SignOutResponse(**await response.json())
+        body = await parse_json(response)
+        SignOutResponse(**body)
         logger.info("Signed out")
 
     async def licence_information(self) -> LicenceInformation:
@@ -158,8 +165,8 @@ class LoggedinClient:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = LicenceInformationResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = LicenceInformationResponse(**body)
         logger.debug(
             "Fetched licence information, %d categories",
             len(parsed.data.licence_categories),
@@ -184,12 +191,14 @@ class LoggedinClient:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = ActiveReservationsResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = ActiveReservationsResponse(**body)
         logger.debug("Fetched active reservations")
         return parsed.data
 
-    async def get_confirmed_examinations(self, licence_id: int) -> list[dict]:
+    async def get_confirmed_examinations(
+        self, licence_id: int
+    ) -> list[dict[str, object]]:
         response = await self._session.post(
             "https://fp.trafikverket.se/Boka/get-confirmed-examinations",
             headers={
@@ -207,8 +216,8 @@ class LoggedinClient:
             },
             json={"licenceId": licence_id},
         )
-        response.raise_for_status()
-        parsed = ConfirmedExaminationsResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = ConfirmedExaminationsResponse(**body)
         logger.debug("Fetched confirmed examinations for licence_id=%d", licence_id)
         return parsed.data
 
@@ -243,8 +252,8 @@ class LoggedinClient:
                 ),
             },
         )
-        response.raise_for_status()
-        parsed = BookingHindrancesResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = BookingHindrancesResponse(**body)
         logger.debug(
             "Booking hindrances for licence_id=%d: can_book=%s",
             licence_id,
@@ -273,8 +282,8 @@ class LoggedinClient:
             },
             json={"licenceId": licence_id, "ssn": self._personal_identity_number},
         )
-        response.raise_for_status()
-        parsed = SuggestedReservationsResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = SuggestedReservationsResponse(**body)
         logger.debug("Fetched suggested reservations for licence_id=%d", licence_id)
         return parsed.data
 
@@ -309,8 +318,8 @@ class LoggedinClient:
                 ),
             },
         )
-        response.raise_for_status()
-        parsed = SearchInformationResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = SearchInformationResponse(**body)
         logger.debug(
             "Fetched search information for licence_id=%d, %d locations",
             licence_id,
@@ -369,8 +378,8 @@ class LoggedinClient:
                 },
             },
         )
-        response.raise_for_status()
-        parsed = OccasionBundlesResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = OccasionBundlesResponse(**body)
         logger.debug(
             "Fetched occasion bundles for location_id=%d, %d bundles",
             location_id,
@@ -396,8 +405,8 @@ class LoggedinClient:
             },
             data="null",
         )
-        response.raise_for_status()
-        parsed = SystemUpdatingResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = SystemUpdatingResponse(**body)
         logger.debug("is_system_updating=%s", parsed.data.is_updating)
         return parsed.data
 
@@ -437,8 +446,8 @@ class LoggedinClient:
                 ),
             },
         )
-        response.raise_for_status()
-        CreateReservationResponse(**await response.json())
+        body = await parse_json(response)
+        CreateReservationResponse(**body)
         logger.info("Created reservation for licence_id=%d", licence_id)
 
     async def reservation_information(
@@ -472,8 +481,8 @@ class LoggedinClient:
                 ),
             },
         )
-        response.raise_for_status()
-        parsed = ReservationInformationResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = ReservationInformationResponse(**body)
         logger.debug("Fetched reservation information for licence_id=%d", licence_id)
         return parsed.data
 
@@ -499,7 +508,84 @@ class LoggedinClient:
                 ]
             },
         )
-        response.raise_for_status()
-        parsed = ReservationTimeResponse(**await response.json())
+        body = await parse_json(response)
+        parsed = ReservationTimeResponse(**body)
         logger.debug("Reservation time remaining: %d seconds", parsed.data)
+        return parsed.data
+
+    async def get_examinations(self) -> ExaminationsData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/examinations",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "text/plain",
+            },
+            data="null",
+        )
+        body = await parse_json(response)
+        parsed = ExaminationsResponse(**body)
+        logger.debug(
+            "Fetched examinations: %d confirmed, %d completed",
+            len(parsed.data.confirmed_examinations),
+            len(parsed.data.completed_examinations),
+        )
+        return parsed.data
+
+    async def get_aspirant_information(self) -> InformationData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/information",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "text/plain",
+            },
+            data="null",
+        )
+        body = await parse_json(response)
+        parsed = InformationResponse(**body)
+        logger.debug("Fetched aspirant information: %s", parsed.data.aspirant.name)
+        return parsed.data
+
+    async def get_payment_model(self) -> PaymentModelData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/GetPaymentModel",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={"directPaymentReferenceId": None},
+        )
+        body = await parse_json(response)
+        parsed = PaymentModelResponse(**body)
+        logger.debug(
+            "Fetched payment model: has_debt=%s, balance=%.2f",
+            parsed.data.has_debt,
+            parsed.data.available_balance,
+        )
         return parsed.data

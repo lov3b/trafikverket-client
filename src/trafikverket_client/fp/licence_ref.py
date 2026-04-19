@@ -77,7 +77,7 @@ class LicenceRef:
             examination_type_id=examination_type_id,
         )
 
-    async def get_confirmed_examinations(self) -> list[dict]:
+    async def get_confirmed_examinations(self) -> list[dict[str, object]]:
         return await self._client.get_confirmed_examinations(
             licence_id=self._licence_id
         )
