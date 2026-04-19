@@ -15,6 +15,11 @@ pip3 install "trafikverket-client[qr]"
 
 Du vill förmodligen ta en kik under [exempel](/examples) för hur biblioteket kan användas.
 
+
+## Beroenden
+
+Projektet använder [pydantic](https://github.com/pydantic/pydantic) för att validera och definera data från Trafikverket och [aiohttp](https://github.com/aio-libs/aiohttp) som snabb och effektiv HTTP-klient.
+
 ## Vägkarta
 
 - [x] Logga in med BankID
