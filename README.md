@@ -1,3 +1,11 @@
+<div align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg" />
+        <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg" />
+        <img src="assets/logo-light.svg" alt="icon" height=250 />
+    </picture>
+</div>
+
 # Trafikverket Client
 
 En inofficiel klient för Trafikverkets webbapi.
