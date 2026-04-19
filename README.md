@@ -1,12 +1,16 @@
 <div align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg" />
-        <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg" />
-        <img src="assets/logo-light.svg" alt="icon" height=250 />
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lov3b/trafikverket-client/master/assets/logo-dark.svg" />
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/lov3b/trafikverket-client/master/assets/logo-light.svg" />
+        <img src="https://raw.githubusercontent.com/lov3b/trafikverket-client/master/assets/logo-light.svg" alt="icon" height=250 />
     </picture>
 </div>
 
 # Trafikverket Client
+
+![GitHub top language](https://img.shields.io/github/languages/top/lov3b/trafikverket-client) 
+![PyPI - Version](https://img.shields.io/pypi/v/trafikverket-client)
+![GitHub License](https://img.shields.io/github/license/lov3b/trafikverket-client)
 
 En inofficiel klient för Trafikverkets webbapi.
 För närvarande stöds endast [fp.trafikverket.se](https://fp.trafikverket.se),

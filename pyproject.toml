@@ -1,16 +1,37 @@
 [project]
 name = "trafikverket-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "En inofficiell klient för Trafikverket"
 readme = "README.md"
 authors = [
     { name = "Love Billenius", email = "love@billenius.com" }
 ]
 requires-python = ">=3.10"
+license = "BSD-2-Clause"
+keywords = ["trafikverket", "bankid", "driving-test", "booking", "async"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: AsyncIO",
+    "Typing :: Typed",
+    "Natural Language :: Swedish",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "aiohttp>=3.9",
     "pydantic>=2.9",
 ]
+
+[project.urls]
+Homepage = "https://github.com/lov3b/trafikverket-client"
+Repository = "https://github.com/lov3b/trafikverket-client"
+Issues = "https://github.com/lov3b/trafikverket-client/issues"
 
 [project.optional-dependencies]
 qr = ["qrcode>=8.0"]
