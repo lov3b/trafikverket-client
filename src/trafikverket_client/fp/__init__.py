@@ -17,5 +17,5 @@ __all__ = [
     "NotLoggedInError",
     "ShowQr",
     "Client",
-    "models"
+    "models",
 ]
