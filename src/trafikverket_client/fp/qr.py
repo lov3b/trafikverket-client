@@ -21,7 +21,7 @@ try:
     HAS_QRCODE = True
 except ImportError:
     _qrcode = None  # type: ignore[assignment]
-    HAS_QRCODE = False
+    HAS_QRCODE = False  # type: ignore
 
 _UPPER_HALF = "\u2580"  # ▀
 _LOWER_HALF = "\u2584"  # ▄
