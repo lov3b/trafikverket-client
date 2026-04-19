@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from .models import (
     BookingHindrancesData,
+    InvoicePaymentData,
     Licence,
     LicenceCategory,
     OccasionBundle,
@@ -12,6 +13,7 @@ from .models import (
     ReservationInformationData,
     SearchInformationData,
     SuggestedReservation,
+    SummaryData,
 )
 
 if TYPE_CHECKING:
@@ -137,4 +139,23 @@ class LicenceRef:
             licence_id=self._licence_id,
             examination_type_id=examination_type_id,
             booking_mode_id=booking_mode_id,
+        )
+
+    async def invoice_payment(
+        self,
+        examination_type_id: int,
+        reservation_info: ReservationInformationData,
+        booking_mode_id: int = 0,
+    ) -> InvoicePaymentData:
+        return await self._client.invoice_payment(
+            licence_id=self._licence_id,
+            examination_type_id=examination_type_id,
+            reservation_info=reservation_info,
+            booking_mode_id=booking_mode_id,
+        )
+
+    async def summary(self, booking_id: str) -> SummaryData:
+        return await self._client.summary(
+            booking_id=booking_id,
+            licence_id=self._licence_id,
         )

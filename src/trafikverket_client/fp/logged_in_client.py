@@ -14,10 +14,15 @@ from .models import (
     BookingHindrancesResponse,
     ConfirmedExaminationsResponse,
     CreateReservationResponse,
+    ConfirmCancelResponse,
     ExaminationsData,
     ExaminationsResponse,
+    ExaminationsToCancelData,
+    ExaminationsToCancelResponse,
     InformationData,
     InformationResponse,
+    InvoicePaymentData,
+    InvoicePaymentResponse,
     LicenceInformationData,
     LicenceInformationResponse,
     OccasionBundle,
@@ -35,6 +40,8 @@ from .models import (
     StartData,
     StartResponse,
     SuggestedReservationsResponse,
+    SummaryData,
+    SummaryResponse,
     SystemUpdatingData,
     SystemUpdatingResponse,
 )
@@ -587,5 +594,136 @@ class LoggedinClient:
             "Fetched payment model: has_debt=%s, balance=%.2f",
             parsed.data.has_debt,
             parsed.data.available_balance,
+        )
+        return parsed.data
+
+    async def examinations_to_cancel(
+        self,
+        examination_id: int,
+    ) -> ExaminationsToCancelData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/examinations-to-cancel",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={"examinationId": examination_id},
+        )
+        body = await parse_json(response)
+        parsed = ExaminationsToCancelResponse(**body)
+        logger.debug(
+            "Examinations to cancel for id=%d: %d examinations",
+            examination_id,
+            len(parsed.data.examinations),
+        )
+        return parsed.data
+
+    async def confirm_cancel(self, examination_id: int) -> None:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/confirm-cancel",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={"examinationId": examination_id},
+        )
+        body = await parse_json(response)
+        ConfirmCancelResponse(**body)
+        logger.info("Cancelled examination id=%d", examination_id)
+
+    async def invoice_payment(
+        self,
+        licence_id: int,
+        examination_type_id: int,
+        reservation_info: ReservationInformationData,
+        booking_mode_id: int = 0,
+    ) -> InvoicePaymentData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/invoice-payment",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={
+                "bookingSession": _booking_session(
+                    self._personal_identity_number,
+                    licence_id,
+                    booking_mode_id,
+                    examination_type_id,
+                ),
+                "bundleReservation": reservation_info.model_dump(
+                    by_alias=True,
+                    mode="json",
+                ),
+            },
+        )
+        body = await parse_json(response)
+        parsed = InvoicePaymentResponse(**body)
+        logger.info(
+            "Invoice payment: success=%s, booking_id=%s",
+            parsed.data.success,
+            parsed.data.booking_id,
+        )
+        return parsed.data
+
+    async def summary(
+        self,
+        booking_id: str,
+        licence_id: int,
+    ) -> SummaryData:
+        response = await self._session.post(
+            "https://fp.trafikverket.se/Boka/summary",
+            headers={
+                "User-Agent": self._user_agent,
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": "https://fp.trafikverket.se",
+                "Connection": "keep-alive",
+                "Referer": "https://fp.trafikverket.se/Boka/ng/",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={
+                "socialSecurityNumber": self._personal_identity_number,
+                "bookingId": booking_id,
+                "licenceId": licence_id,
+            },
+        )
+        body = await parse_json(response)
+        parsed = SummaryResponse(**body)
+        logger.debug(
+            "Summary: %d confirmed, %d cancelled",
+            len(parsed.data.confirmed_examinations),
+            len(parsed.data.cancelled_examinations),
         )
         return parsed.data
