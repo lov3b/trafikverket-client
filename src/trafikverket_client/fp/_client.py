@@ -36,7 +36,7 @@ class Client:
     async def __aenter__(self) -> "Client":
         return self
 
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    async def __aexit__(self, exc_type, exc, tb) -> None:  # type: ignore
         await self.close()
 
     async def login(

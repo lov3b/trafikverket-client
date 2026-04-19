@@ -91,7 +91,7 @@ class LoggedinClient:
     async def __aenter__(self) -> "LoggedinClient":
         return self
 
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    async def __aexit__(self, exc_type, exc, tb) -> None:  # type: ignore
         await self.close()
 
     @property
