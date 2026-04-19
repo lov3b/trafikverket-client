@@ -1,7 +1,7 @@
 # Trafikverket Client
 
 En inofficiel klient för Trafikverkets webbapi.
-För närvarande stöds endast [https://fp.trafikverket.se](fp.trafikverket.se),
+För närvarande stöds endast [fp.trafikverket.se](https://fp.trafikverket.se),
 men jag är öppen för att lägga till fler subsidor och så vidare.
 
 ## Kom igång
