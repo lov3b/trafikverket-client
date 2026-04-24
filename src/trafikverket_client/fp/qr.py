@@ -1,7 +1,4 @@
-"""Optional terminal QR-code renderer.
-
-Requires the ``qrcode`` package (install with ``pip install trafikverket-client[qr]``).
-"""
+"""Terminal QR-code renderer for BankID login."""
 
 from __future__ import annotations
 
@@ -10,33 +7,15 @@ import hmac
 import logging
 import sys
 import time
-from enum import Enum, auto
 from typing import TextIO
 
+import qrcode as _qrcode
+
 logger = logging.getLogger(__name__)
-
-try:
-    import qrcode as _qrcode
-
-    HAS_QRCODE = True
-except ImportError:
-    _qrcode = None  # type: ignore[assignment]
-    HAS_QRCODE = False  # type: ignore
 
 _UPPER_HALF = "\u2580"  # ▀
 _LOWER_HALF = "\u2584"  # ▄
 _FULL = "\u2588"  # █
-
-
-class ShowQr(Enum):
-    """Controls QR code rendering in the terminal during BankID login."""
-
-    AUTO = auto()
-    """Show the QR code if the ``qrcode`` package is installed (default)."""
-    ALWAYS = auto()
-    """Always show the QR code; raise if ``qrcode`` is not installed."""
-    NEVER = auto()
-    """Never show the QR code."""
 
 
 class QrRenderer:
@@ -49,7 +28,6 @@ class QrRenderer:
 
     def render(self, data: str) -> str:
         """Return a compact Unicode string representing *data* as a QR code."""
-        assert _qrcode is not None
         qr = _qrcode.QRCode(border=self._border)
         qr.add_data(data)
         qr.make(fit=True)
@@ -87,8 +65,8 @@ class QrRenderer:
         self._printed_lines = 0
 
 
-class NoopQrRenderer(QrRenderer):
-    """No-op renderer used when QR display is disabled or unavailable."""
+class _NoopQrRenderer(QrRenderer):
+    """No-op renderer used when QR display is disabled."""
 
     def __init__(self) -> None:
         self._printed_lines = 0
@@ -103,16 +81,11 @@ class NoopQrRenderer(QrRenderer):
         pass
 
 
-def make_qr_renderer(show_qr: ShowQr) -> QrRenderer:
-    """Create the appropriate renderer based on the *show_qr* setting."""
-    if show_qr is ShowQr.ALWAYS and not HAS_QRCODE:
-        raise ImportError(
-            "show_qr is ALWAYS but the 'qrcode' package is not installed. "
-            "Install with: pip install trafikverket-client[qr]"
-        )
-    if show_qr is ShowQr.ALWAYS or (show_qr is ShowQr.AUTO and HAS_QRCODE):
+def make_qr_renderer(show_qr: bool) -> QrRenderer:
+    """Create a renderer, or a no-op if *show_qr* is False."""
+    if show_qr:
         return QrRenderer()
-    return NoopQrRenderer()
+    return _NoopQrRenderer()
 
 
 def make_bankid_qr_payload(

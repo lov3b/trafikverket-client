@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 from .models import (
@@ -6,17 +8,17 @@ from .models import (
     LicenceInformationData,
 )
 from .exceptions import LicenceNotFoundError
-from .licence_ref import LicenceRef
+from .bookable_licence import BookableLicence
 
 if TYPE_CHECKING:
-    from .logged_in_client import LoggedinClient
+    from ._context import HttpContext
 
 
 class LicenceInformation:
     """Populated, queryable view over :class:`LicenceInformationData`."""
 
-    def __init__(self, client: "LoggedinClient", data: LicenceInformationData) -> None:
-        self._client = client
+    def __init__(self, context: HttpContext, data: LicenceInformationData) -> None:
+        self._context = context
         self._data = data
 
     @property
@@ -28,26 +30,26 @@ class LicenceInformation:
         return self._data.personal_identity_number
 
     @property
-    def current(self) -> Optional[LicenceRef]:
+    def current(self) -> Optional[BookableLicence]:
         licence = self._data.current_licence
         if licence is None:
             return None
-        return LicenceRef(self._client, licence.id, licence=licence)
+        return BookableLicence(self._context, licence.id, licence=licence)
 
-    def all(self) -> list[LicenceRef]:
+    def all(self) -> list[BookableLicence]:
         return [
-            LicenceRef(self._client, lic.id, licence=lic)
+            BookableLicence(self._context, lic.id, licence=lic)
             for lic in self._data.iter_licences()
         ]
 
-    def by_category(self, category: LicenceCategory) -> list[LicenceRef]:
+    def by_category(self, category: LicenceCategory) -> list[BookableLicence]:
         return [
-            LicenceRef(self._client, license.id, licence=license)
+            BookableLicence(self._context, license.id, licence=license)
             for license in self._data.iter_licences()
             if license.category == category
         ]
 
-    def by_group(self, group: LicenceGroup) -> list[LicenceRef]:
+    def by_group(self, group: LicenceGroup) -> list[BookableLicence]:
         return self.by_category(group.category)
 
     def get(
@@ -56,12 +58,12 @@ class LicenceInformation:
         category: Optional[LicenceCategory] = None,
         group: Optional[LicenceGroup] = None,
         licence_id: Optional[int] = None,
-    ) -> LicenceRef:
+    ) -> BookableLicence:
         if licence_id is not None:
             licence = self._data.find_by_id(licence_id)
             if licence is None:
                 raise LicenceNotFoundError(f"No licence with id={licence_id}")
-            return LicenceRef(self._client, licence.id, licence=licence)
+            return BookableLicence(self._context, licence.id, licence=licence)
 
         if group is not None and category is not None and group.category != category:
             raise ValueError(
@@ -92,4 +94,4 @@ class LicenceInformation:
                 f"category={effective_category!r} (ids={ids}) - add the missing filter"
             )
         [licence] = matches
-        return LicenceRef(self._client, licence.id, licence=licence)
+        return BookableLicence(self._context, licence.id, licence=licence)

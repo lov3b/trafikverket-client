@@ -2,7 +2,7 @@ import asyncio
 import webbrowser
 from urllib.parse import urlencode
 
-from trafikverket_client.fp import Client, ShowQr
+from trafikverket_client.fp import Client, Session
 
 
 def make_bankid_autostart_url(autostart_token: str) -> str:
@@ -17,7 +17,7 @@ def make_bankid_app_url(autostart_token: str) -> str:
 
 async def main() -> None:
     async with Client() as client:
-        loginable = await client.begin_login(show_qr=ShowQr.NEVER)
+        loginable = await client.begin_login(show_qr=False)
 
         autostart_token = loginable.authentication_data.autostart_token
         bankid_url = make_bankid_autostart_url(autostart_token)
@@ -38,10 +38,10 @@ async def main() -> None:
             pass
 
         logged_in = await loginable.wait_until_logged_in()
-        client_session = logged_in.into_client()
+        session = Session(logged_in.into_context())
 
-        licence_information = await client_session.licence_information()
-        print(f"Logged in as: {licence_information.personal_identity_number}")
+        licences = await session.get_licences()
+        print(f"Logged in as: {licences.personal_identity_number}")
 
 
 if __name__ == "__main__":

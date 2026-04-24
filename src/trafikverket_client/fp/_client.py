@@ -7,13 +7,12 @@ from aiohttp import ClientSession, ClientTimeout
 
 from ._util import parse_json
 from .models import AuthenticationResponse
-from .qr import ShowQr
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .logged_in_client import LoggedinClient
     from .loginable import Loginable
+    from .session import Session
 
 
 class Client:
@@ -41,21 +40,23 @@ class Client:
 
     async def login(
         self,
-        show_qr: ShowQr = ShowQr.AUTO,
+        show_qr: bool = True,
         poll_interval_seconds: float = 2.0,
         timeout_seconds: float = 180.0,
-    ) -> "LoggedinClient":
-        """Log in via BankID and return a ready-to-use :class:`LoggedinClient`."""
+    ) -> "Session":
+        """Log in via BankID and return a ready-to-use :class:`Session`."""
+        from .session import Session
+
         loginable = await self.begin_login(show_qr=show_qr)
         done = await loginable.wait_until_logged_in(
             poll_interval_seconds=poll_interval_seconds,
             timeout_seconds=timeout_seconds,
         )
-        return done.into_client()
+        return Session(done.into_context())
 
     async def begin_login(
         self,
-        show_qr: ShowQr = ShowQr.AUTO,
+        show_qr: bool = True,
     ) -> "Loginable":
         """Kick off BankID QR authentication."""
         from .loginable import Loginable

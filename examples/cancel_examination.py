@@ -5,30 +5,29 @@ from trafikverket_client.fp import Client
 
 async def main() -> None:
     async with Client() as client:
-        logged_in = await client.login()
+        session = await client.login()
+        exams = await session.get_examinations()
 
-        data = await logged_in.get_examinations()
-
-        cancellable = [e for e in data.confirmed_examinations if e.can_cancel]
-        if not cancellable:
+        if not exams.cancellable:
             print("No cancellable examinations")
             return
 
-        exam = cancellable[0]
+        exam = exams.cancellable[0]
         print(
-            f"Cancelling: {exam.name} at {exam.place.display_name}, {exam.start_date}"
+            f"Cancelling: {exam.name} at {exam.data.place.display_name}, "
+            f"{exam.start_date}"
         )
 
         # Preview what will be cancelled
-        preview = await logged_in.examinations_to_cancel(exam.id)
-        if preview.show_24_hour_cancellation_warning:
+        preview = await exam.cancel_preview()
+        if preview.show_24_hour_warning:
             print("Warning: less than 24 hours until examination!")
 
         for e in preview.examinations:
             print(f"  Will cancel: {e.name} (id={e.id})")
 
         # Confirm cancellation
-        await logged_in.confirm_cancel(exam.id)
+        await preview.confirm()
         print("Examination cancelled")
 
 
