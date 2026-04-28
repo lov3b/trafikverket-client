@@ -1,6 +1,6 @@
 [project]
 name = "trafikverket-client"
-version = "0.1.1"
+version = "1.0.0"
 description = "En inofficiell klient för Trafikverket"
 readme = "README.md"
 authors = [
