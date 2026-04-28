@@ -13,13 +13,13 @@ from .models import (
     IsAuthorizedResponse,
 )
 from ._util import parse_json
-from .exceptions import BankidStop
-from .qr import ShowQr, make_bankid_qr_payload, make_qr_renderer
+from .exceptions import BankidStop, NotLoggedInError
+from .qr import make_bankid_qr_payload, make_qr_renderer
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .logged_in_client import LoggedinClient
+    from ._context import HttpContext
 
 
 class Loginable:
@@ -29,7 +29,7 @@ class Loginable:
         authentication_data: AuthenticationData,
         user_agent: str,
         logged_in_as: Optional[str] = None,
-        show_qr: ShowQr = ShowQr.AUTO,
+        show_qr: bool = True,
     ) -> None:
         self._session = session
         self._authentication_data = authentication_data
@@ -122,11 +122,15 @@ class Loginable:
 
         return await asyncio.wait_for(_loop(), timeout=timeout_seconds)
 
-    def into_client(self) -> "LoggedinClient":
-        """Convert this completed login into a :class:`LoggedinClient`."""
-        from .logged_in_client import LoggedinClient
+    def into_context(self) -> "HttpContext":
+        """Convert this completed login into an :class:`HttpContext`."""
+        from ._context import HttpContext
 
-        return LoggedinClient(self._session, self, self._user_agent)
+        if not self.is_logged_in or self._logged_in_as is None:
+            raise NotLoggedInError(
+                "into_context() requires a Loginable that has completed BankID"
+            )
+        return HttpContext(self._session, self._user_agent, self._logged_in_as)
 
     async def is_authorized(self) -> bool:
         """Ask the backend whether the session cookie is still authorized."""

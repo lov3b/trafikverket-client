@@ -58,6 +58,15 @@ from .examination import (
     InformationData,
     InformationResponse,
 )
+from .confirmation import (
+    ConfirmCancelResponse,
+    ExaminationsToCancelData,
+    ExaminationsToCancelResponse,
+    InvoicePaymentData,
+    InvoicePaymentResponse,
+    SummaryData,
+    SummaryResponse,
+)
 from .payment import (
     PaymentHistoryItem,
     PaymentModelData,
@@ -136,4 +145,11 @@ __all__ = [
     "PaymentHistoryItem",
     "PaymentModelData",
     "PaymentModelResponse",
+    "ConfirmCancelResponse",
+    "ExaminationsToCancelData",
+    "ExaminationsToCancelResponse",
+    "InvoicePaymentData",
+    "InvoicePaymentResponse",
+    "SummaryData",
+    "SummaryResponse",
 ]

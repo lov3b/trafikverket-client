@@ -369,7 +369,7 @@ class ReservationInformationData(BaseModel):
 
     aspirant: Aspirant
     reservations: list[Occasion]
-    cancellations: list[dict[str, object]]
+    cancellations: list[Occasion]
     add_prepaid_photo_fee: bool
     prepaid_photo_fee_cost: float
     is_rescheduling: bool

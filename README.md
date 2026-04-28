@@ -40,7 +40,9 @@ Projektet använder [pydantic](https://github.com/pydantic/pydantic) för att va
 - [x] Se tider tillgängliga för examination
 - [x] Se bokade tider
 - [x] Se behörighet
-- [ ] Boka en examination
+- [x] Boka en examination
+- [x] Avboka en examination
+- [x] Omboka en examination
 
 
 ## Juridiskt
